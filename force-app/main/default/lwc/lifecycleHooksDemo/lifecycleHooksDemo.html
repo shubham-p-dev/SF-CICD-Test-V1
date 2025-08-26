@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="LWC Lifecycle Demo" icon-name="utility:clock">
+        <div class="slds-p-around_medium">
+            <p>Counter: {counter}</p>
+            <lightning-button 
+                label="Increase Counter" 
+                onclick={handleIncrease}
+                class="slds-m-right_small">
+            </lightning-button>
+
+            <lightning-button 
+                label="Simulate Error" 
+                onclick={handleThrowError}
+                variant="destructive">
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

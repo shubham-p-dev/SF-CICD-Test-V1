@@ -1,0 +1,29 @@
+.parent {
+    display: flex;
+    width: 100%;
+}
+
+.path-item {
+    flex: 1;
+    }
+    
+.center {
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+
+[data-apply-bg='bgGreen']{
+    background-color: limegreen;
+}
+
+[data-apply-bg='bgRed']{
+    background-color: red;
+}
+
+[data-apply-bg='bgYellow']{
+    background-color: yellow;
+}

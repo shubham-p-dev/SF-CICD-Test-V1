@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="Parent LWC">
+        <div class="slds-m-around_medium">
+            <!-- Sending data to Child -->
+            <lightning-input label="Message to Child"
+                             value={parentMessage}
+                             onchange={handleParentInput}>
+            </lightning-input>
+
+            <!-- Passing data to child using property -->
+            <c-child-component-example-v1 message-from-parent={parentMessage}
+                               onmessagefromchild={handleChildMessage}
+                               onshubhamevent={handleShubhamEvent}
+                               >
+            </c-child-component-example-v1>
+
+            <p><strong>Message from Child:</strong> {childMessage}</p>
+            <p><strong>Message from Child messageFromShubhamEvent:</strong> {messageFromShubhamEvent}</p>
+        </div>
+    </lightning-card>
+</template>

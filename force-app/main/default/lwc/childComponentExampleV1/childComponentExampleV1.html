@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="Child LWC">
+        <div class="slds-m-around_medium">
+            <p><strong>Message from Parent:</strong> {messageFromParent}</p>
+
+            <lightning-input label="Message to Parent"
+                             value={childMessage}
+                             onchange={handleChildInput}>
+            </lightning-input>
+
+            <lightning-button label="Send to Parent"
+                              variant="brand"
+                              onclick={sendMessageToParentShubhamEvent}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

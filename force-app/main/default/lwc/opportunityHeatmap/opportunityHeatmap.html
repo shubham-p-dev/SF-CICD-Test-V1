@@ -1,0 +1,15 @@
+<template>
+
+    <!-- <lightning-card> -->
+        <div class="parent">
+            <template for:each={stages} for:item="stage">
+                <div key={stage.id} class="path-item" data-apply-bg={stage.bgClass}>
+                    <div class="slds-p-horizontal_small slds-p-vertical_small center">
+                        <span>{stage.title}</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    <!-- </lightning-card> -->
+
+</template>
