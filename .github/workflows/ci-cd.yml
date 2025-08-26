@@ -10,28 +10,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout your code
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Node.js
+      # 2. Install Node.js (required for sfdx-cli)
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      # 3. Install Salesforce CLI via npm
       - name: Install Salesforce CLI
         run: npm install sfdx-cli --global
 
+      # 4. Authenticate Dev Hub using JWT
       - name: Authenticate Dev Hub
-        run: sfdx auth:jwt:grant --clientid ${{ secrets.CONSUMER_KEY }} --jwtkeyfile assets/server.key --username ${{ secrets.SF_USERNAME }} --setdefaultdevhubusername -a DevHub
+        run: sfdx auth:jwt:grant \
+          --clientid ${{ secrets.CONSUMER_KEY }} \
+          --jwtkeyfile assets/server.key \
+          --username ${{ secrets.SF_USERNAME }} \
+          --setdefaultdevhubusername -a DevHub
 
+      # 5. Verify authentication
+      - name: Verify Dev Hub Auth
+        run: sfdx force:org:list
+
+      # 6. Create Scratch Org
       - name: Create Scratch Org
-        run: sfdx force:org:create -f config/project-scratch-def.json -a ScratchOrg -s -d 7
+        run: sfdx force:org:create \
+          -f config/project-scratch-def.json \
+          -a ScratchOrg \
+          -s \
+          -d 7 \
+          -v DevHub
 
+      # 7. Push source code to Scratch Org
       - name: Push Source to Scratch Org
-        run: sfdx force:source:push
+        run: sfdx force:source:push -u ScratchOrg
 
+      # 8. Run Apex Tests
       - name: Run Apex Tests
-        run: sfdx force:apex:test:run --resultformat human --wait 10
+        run: sfdx force:apex:test:run \
+          --resultformat human \
+          --wait 10 \
+          -u ScratchOrg
 
+      # 9. Delete Scratch Org after tests
       - name: Delete Scratch Org
         run: sfdx force:org:delete -u ScratchOrg -p
