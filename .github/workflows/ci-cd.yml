@@ -1,5 +1,6 @@
 name: Salesforce CI/CD
 
+# Trigger workflow whenever code is pushed to "main" branch
 on:
   push:
     branches:
@@ -10,52 +11,92 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout your code
+      # ---------------------------------------------------------
+      # STEP 1: Checkout your source code from GitHub repo
+      # ---------------------------------------------------------
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. Install Node.js (required for sfdx-cli)
+      # ---------------------------------------------------------
+      # STEP 2: Setup Node.js (needed to install Salesforce CLI)
+      # ---------------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3. Install Salesforce CLI via npm
+      # ---------------------------------------------------------
+      # STEP 3: Install Salesforce CLI globally using npm
+      # ---------------------------------------------------------
       - name: Install Salesforce CLI
         run: npm install sfdx-cli --global
 
-      # 4. Authenticate Dev Hub using JWT
+      # ---------------------------------------------------------
+      # STEP 4: Authenticate to your Dev Hub org using JWT
+      # - Requires GitHub secrets:
+      #   CONSUMER_KEY  = Connected App Consumer Key
+      #   SF_USERNAME   = Dev Hub username (e.g. yourname@domain.com)
+      # - Requires private key file "assets/server.key"
+      # ---------------------------------------------------------
       - name: Authenticate Dev Hub
-        run: sfdx auth:jwt:grant \
-          --clientid ${{ secrets.CONSUMER_KEY }} \
-          --jwtkeyfile assets/server.key \
-          --username ${{ secrets.SF_USERNAME }} \
-          --setdefaultdevhubusername -a DevHub
+        run: |
+          echo "🔑 Authenticating with Dev Hub..."
+          sfdx auth:jwt:grant \
+            --clientid ${{ secrets.CONSUMER_KEY }} \
+            --jwtkeyfile assets/server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --setdefaultdevhubusername -a DevHub || exit 1
+          echo "✅ Authentication complete"
 
-      # 5. Verify authentication
+      # ---------------------------------------------------------
+      # STEP 5: Verify Dev Hub authentication worked
+      # This will list all authenticated orgs in the runner
+      # Look for "DevHub" in the output
+      # ---------------------------------------------------------
       - name: Verify Dev Hub Auth
-        run: sfdx force:org:list
+        run: |
+          echo "📋 Listing authenticated orgs..."
+          sfdx force:org:list
 
-      # 6. Create Scratch Org
+      # ---------------------------------------------------------
+      # STEP 6: Create a new Scratch Org
+      # - Uses your config/project-scratch-def.json definition
+      # - Alias: ScratchOrg
+      # - Duration: 7 days
+      # ---------------------------------------------------------
       - name: Create Scratch Org
-        run: sfdx force:org:create \
-          -f config/project-scratch-def.json \
-          -a ScratchOrg \
-          -s \
-          -d 7 \
-          -v DevHub
+        run: |
+          echo "🏗️ Creating Scratch Org..."
+          sfdx force:org:create \
+            -f config/project-scratch-def.json \
+            -a ScratchOrg \
+            -s \
+            -d 7 \
+            -v DevHub
 
-      # 7. Push source code to Scratch Org
+      # ---------------------------------------------------------
+      # STEP 7: Push source code from repo into Scratch Org
+      # ---------------------------------------------------------
       - name: Push Source to Scratch Org
-        run: sfdx force:source:push -u ScratchOrg
+        run: |
+          echo "🚀 Pushing metadata to Scratch Org..."
+          sfdx force:source:push -u ScratchOrg
 
-      # 8. Run Apex Tests
+      # ---------------------------------------------------------
+      # STEP 8: Run all Apex tests in the Scratch Org
+      # ---------------------------------------------------------
       - name: Run Apex Tests
-        run: sfdx force:apex:test:run \
-          --resultformat human \
-          --wait 10 \
-          -u ScratchOrg
+        run: |
+          echo "🧪 Running Apex tests..."
+          sfdx force:apex:test:run \
+            --resultformat human \
+            --wait 10 \
+            -u ScratchOrg
 
-      # 9. Delete Scratch Org after tests
+      # ---------------------------------------------------------
+      # STEP 9: Delete the Scratch Org to save license usage
+      # ---------------------------------------------------------
       - name: Delete Scratch Org
-        run: sfdx force:org:delete -u ScratchOrg -p
+        run: |
+          echo "🧹 Cleaning up (deleting Scratch Org)..."
+          sfdx force:org:delete -u ScratchOrg -p
