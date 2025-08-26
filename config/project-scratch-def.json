@@ -1,13 +1,10 @@
 {
-  "orgName": "Demo company",
+  "orgName": "Demo Company",
   "edition": "Developer",
-  "features": ["EnableSetPasswordInApi"],
+  "features": ["API"],
   "settings": {
-    "lightningExperienceSettings": {
-      "enableS1DesktopEnabled": true
-    },
-    "mobileSettings": {
-      "enableS1EncryptedStoragePref2": false
+    "orgPreferenceSettings": {
+      "s1DesktopEnabled": true
     }
   }
 }
